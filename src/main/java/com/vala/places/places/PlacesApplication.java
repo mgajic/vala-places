@@ -1,6 +1,5 @@
 package com.vala.places.places;
 
-import com.vala.places.places.verticles.RecipientVerticle;
 import com.vala.places.places.verticles.ServerVerticle;
 import io.vertx.core.Vertx;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,9 @@ public class PlacesApplication {
     @Autowired
     private ServerVerticle serverVerticle;
 
-    @Autowired
-    private RecipientVerticle serviceVerticle;
-
+    /*  @Autowired
+      private RecipientVerticle serviceVerticle;
+  */
     public static void main(String[] args) {
         SpringApplication.run(PlacesApplication.class, args);
     }
@@ -28,6 +27,6 @@ public class PlacesApplication {
     public void deployVerticle() {
         final Vertx vertx = Vertx.vertx();
         vertx.deployVerticle(serverVerticle);
-        vertx.deployVerticle(serviceVerticle);
+        //  vertx.deployVerticle(serviceVerticle);
     }
 }
