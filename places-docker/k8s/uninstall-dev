@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+# Uninstall places from vala-dev
+#
+kubectl delete deployment --namespace vala-dev places
+kubectl delete service --namespace vala-dev places
+kubectl delete configmap --namespace vala-dev places-config
+

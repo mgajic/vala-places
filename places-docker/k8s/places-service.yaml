@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: places
+  labels:
+    component: places
+spec:
+  selector:
+    component: places
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: http
+    nodePort: 32100
+  type: NodePort

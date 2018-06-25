@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Installs places on vala-dev
+#
+kubectl create namespace vala-dev
+kubectl create -f places-dev-cfg.yaml
+kubectl create -f places-deployment.yaml --namespace vala-dev
+
+kubectl create -f places-service.yaml --namespace vala-dev

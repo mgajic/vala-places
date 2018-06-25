@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: places-config
+  namespace: vala-dev
+  labels:
+    component: places
+data:
+  application.yaml: |-
+    server:
+      port: 80
