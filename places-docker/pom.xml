@@ -34,7 +34,7 @@
                     <artifactItems>
                         <artifactItem>
                             <groupId>${project.groupId}</groupId>
-                            <artifactId>polls-service</artifactId>
+                            <artifactId>places-service</artifactId>
                             <version>${project.version}</version>
                             <type>jar</type>
                             <overWrite>true</overWrite>
