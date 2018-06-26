@@ -2,8 +2,11 @@ package com.vala.places.places.verticles;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import org.springframework.stereotype.Component;
@@ -29,16 +32,17 @@ public class ServerVerticle extends AbstractVerticle {
                     .end("<h1>Hello from my first Vert.x 3 application</h1>");
         });
 
-        router.get("/api/places/country/:country/text/:text").handler(this::getOne);
+        router.get("/api/places/country/:country/text/:text").handler(this::getPlacesPredictions);
+        router.get("/api/places/metrics").handler(this::getMetrics);
 
         // Create the HTTP server and pass the "accept" method to the request handler.
-        vertx
+        HttpServer httpServer = vertx
                 .createHttpServer()
                 .requestHandler(router::accept)
                 .listen(
                         // Retrieve the port from the configuration,
                         // default to 8080.
-                        config().getInteger("http.port", 8080),
+                        config().getInteger("http.port", 5000),
                         result -> {
                             if (result.succeeded()) {
                                 fut.complete();
@@ -49,7 +53,14 @@ public class ServerVerticle extends AbstractVerticle {
                 );
     }
 
-    private void getOne(RoutingContext routingContext) {
+    private void getMetrics(RoutingContext routingContext) {
+        MetricsService metricsService = MetricsService.create(vertx);
+        JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
+        routingContext.response().putHeader("content-type", "text/json")
+                .end(Json.encodePrettily(metrics));
+    }
+
+    private void getPlacesPredictions(RoutingContext routingContext) {
         String country = routingContext.request().getParam("country");
         String text = routingContext.request().getParam("text");
 
