@@ -1,5 +1,6 @@
 package com.vala.places.places.verticles;
 
+import com.vala.places.places.service.MetricService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerResponse;
@@ -8,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import se.walkercrou.places.GooglePlaces;
 import se.walkercrou.places.Param;
@@ -17,6 +19,9 @@ import java.util.List;
 
 @Component
 public class ServerVerticle extends AbstractVerticle {
+
+    @Autowired
+    private MetricService metricService;
 
     @Override
     public void start(Future<Void> fut) {
@@ -32,6 +37,7 @@ public class ServerVerticle extends AbstractVerticle {
         });
 
         router.get("/api/places/country/:country/text/:text").handler(this::getPlacesAutocompletePredictions);
+        router.get("/api/places/metric").handler(this::getMetric);
         router.get("/api/places/metrics").handler(this::getMetrics);
 
 
@@ -51,6 +57,10 @@ public class ServerVerticle extends AbstractVerticle {
                             }
                         }
                 );
+    }
+
+    private void getMetric(RoutingContext routingContext) {
+
     }
 
     private void getPlacesAutocompletePredictions(RoutingContext routingContext) {
