@@ -2,30 +2,39 @@ package com.vala.places.places.entity;
 
 import org.springframework.data.annotation.PersistenceConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Map;
 
 @Entity
 public class Metric {
 
+
     @Id
+    private long id;
+
     private Long counter;
+
+    @ElementCollection(targetClass=Long.class,fetch = FetchType.EAGER)
+    @MapKeyColumn(name="Country")
     private Map<String,Long> countryCounterMap;
 
     private Metric() {
     }
 
     @PersistenceConstructor
-    public Metric(Long counter, Map<String,Long> countryCounterMap) {
+    public Metric(Long id,Long counter, Map<String,Long> countryCounterMap) {
         super();
+        this.id=id;
         this.counter = counter;
         this.countryCounterMap = countryCounterMap;
     }
 
-    @Override
-    public String toString() {
-        return "Metric [counter=" + counter + ", countryCounterMap=" + countryCounterMap + "]";
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Long getCounter() {

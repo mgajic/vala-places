@@ -1,5 +1,7 @@
 package com.vala.places.places.verticles;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vala.places.places.service.MetricService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -22,6 +24,8 @@ public class ServerVerticle extends AbstractVerticle {
 
     @Autowired
     private MetricService metricService;
+
+    private final ObjectMapper mapper = Json.mapper;
 
     @Override
     public void start(Future<Void> fut) {
@@ -61,11 +65,22 @@ public class ServerVerticle extends AbstractVerticle {
 
     private void getMetric(RoutingContext routingContext) {
 
+        metricService.increaseRequestCounter();
+        try {
+            routingContext.response().putHeader("content-type", "text/json")
+                    .end(Json.encodePrettily(mapper.writeValueAsString(metricService.getPlacesMetric())));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error while parcing the results from metric service");
+        }
+
     }
 
     private void getPlacesAutocompletePredictions(RoutingContext routingContext) {
+
         String country = routingContext.request().getParam("country");
         String text = routingContext.request().getParam("text");
+
+        metricService.increaseRequestAndCountryCounter(country);
 
         GooglePlaces client = new GooglePlaces("AIzaSyARDPo0q1JGwZXXhnY8IL-JmBSQZSm5j84");
         Param components = new Param("components").value("country:" + country);
@@ -78,6 +93,7 @@ public class ServerVerticle extends AbstractVerticle {
     private void getMetrics(RoutingContext routingContext) {
         MetricsService metricsService = MetricsService.create(vertx);
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
+        metricService.increaseRequestCounter();
         routingContext.response().putHeader("content-type", "text/json")
                 .end(Json.encodePrettily(metrics));
     }
