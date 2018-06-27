@@ -1,11 +1,8 @@
 package com.vala.places.places.verticles;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vala.places.places.service.MetricService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.MetricsService;
@@ -22,28 +19,21 @@ import java.util.List;
 @Component
 public class ServerVerticle extends AbstractVerticle {
 
+    public static final String API_KEY = "AIzaSyARDPo0q1JGwZXXhnY8IL-JmBSQZSm5j84";
+    public static final String COMPONENTS_PARAM_TYPE = "components";
+    public static final String COUNTRY_COMPONENT = "country:";
+
     @Autowired
     private MetricService metricService;
-
-    private final ObjectMapper mapper = Json.mapper;
 
     @Override
     public void start(Future<Void> fut) {
         // Create a router object.
         Router router = Router.router(vertx);
 
-        // Bind "/" to our hello message - so we are still compatible.
-        router.route("/").handler(routingContext -> {
-            HttpServerResponse response = routingContext.response();
-            response
-                    .putHeader("content-type", "text/html")
-                    .end("<h1>Hello from my first Vert.x 3 application</h1>");
-        });
-
         router.get("/api/places/country/:country/text/:text").handler(this::getPlacesAutocompletePredictions);
         router.get("/api/places/metric").handler(this::getMetric);
         router.get("/api/places/metrics").handler(this::getMetrics);
-
 
         // Create the HTTP server and pass the "accept" method to the request handler.
         vertx
@@ -66,12 +56,8 @@ public class ServerVerticle extends AbstractVerticle {
     private void getMetric(RoutingContext routingContext) {
 
         metricService.increaseRequestCounter();
-        try {
-            routingContext.response().putHeader("content-type", "text/json")
-                    .end(Json.encodePrettily(mapper.writeValueAsString(metricService.getPlacesMetric())));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error while parcing the results from metric service");
-        }
+        routingContext.response().putHeader("content-type", "text/json")
+                .end(Json.encodePrettily(metricService.getPlacesMetric()));
 
     }
 
@@ -82,8 +68,8 @@ public class ServerVerticle extends AbstractVerticle {
 
         metricService.increaseRequestAndCountryCounter(country);
 
-        GooglePlaces client = new GooglePlaces("AIzaSyARDPo0q1JGwZXXhnY8IL-JmBSQZSm5j84");
-        Param components = new Param("components").value("country:" + country);
+        GooglePlaces client = new GooglePlaces(API_KEY);
+        Param components = new Param(COMPONENTS_PARAM_TYPE).value(COUNTRY_COMPONENT + country);
         List<Prediction> placePredictions = client.getPlacePredictions(text, components);
 
         routingContext.response().putHeader("content-type", "text/json")
@@ -97,6 +83,5 @@ public class ServerVerticle extends AbstractVerticle {
         routingContext.response().putHeader("content-type", "text/json")
                 .end(Json.encodePrettily(metrics));
     }
-
 
 }

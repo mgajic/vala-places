@@ -1,5 +1,6 @@
 package com.vala.places.places;
 
+import com.vala.places.places.configuration.PlacesConfiguration;
 import com.vala.places.places.verticles.ServerVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -9,11 +10,13 @@ import io.vertx.ext.dropwizard.MatchType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
 @SpringBootApplication
+@EnableConfigurationProperties(PlacesConfiguration.class)
 @Configuration
 public class PlacesApplication {
 
