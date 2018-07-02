@@ -36,13 +36,12 @@ public class MetricService {
         return modelMapper.map(metric, MetricDTO.class);
     }
 
-    public void increaseRequestAndCountryCounter(String country) {
+    public void increaseCountryCounter(String country) {
         List<Metric> metrics = metricRepository.findAll();
 
         Metric metric = null;
         if (metrics.size() > 0) {
             metric = metrics.get(0);
-            incCounter(metric);
             updateCountryMap(country, metric);
         } else {
             metric = createNewMetric(country);

@@ -3,6 +3,7 @@ package com.vala.places.places.verticles;
 import com.vala.places.places.service.MetricService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.MetricsService;
@@ -31,8 +32,14 @@ public class ServerVerticle extends AbstractVerticle {
         // Create a router object.
         Router router = Router.router(vertx);
 
-        router.get("/api/places/country/:country/text/:text").handler(this::getPlacesAutocompletePredictions);
-        router.get("/api/places/metric").handler(this::getMetric);
+        router.route().handler(routingContext -> {
+            HttpServerResponse response = routingContext.response();
+            response.setChunked(true);
+            metricService.increaseRequestCounter();
+            routingContext.vertx().setTimer(2000, tid -> routingContext.next());
+        });
+        router.get("/api/places/country/:country/text/:text").blockingHandler(this::getPlacesAutocompletePredictions);
+        router.get("/api/places/metric").blockingHandler(this::getMetric);
         router.get("/api/places/metrics").handler(this::getMetrics);
 
         // Create the HTTP server and pass the "accept" method to the request handler.
@@ -55,7 +62,6 @@ public class ServerVerticle extends AbstractVerticle {
 
     private void getMetric(RoutingContext routingContext) {
 
-        metricService.increaseRequestCounter();
         routingContext.response().putHeader("content-type", "text/json")
                 .end(Json.encodePrettily(metricService.getPlacesMetric()));
 
@@ -66,7 +72,7 @@ public class ServerVerticle extends AbstractVerticle {
         String country = routingContext.request().getParam("country");
         String text = routingContext.request().getParam("text");
 
-        metricService.increaseRequestAndCountryCounter(country);
+        metricService.increaseCountryCounter(country);
 
         GooglePlaces client = new GooglePlaces(API_KEY);
         Param components = new Param(COMPONENTS_PARAM_TYPE).value(COUNTRY_COMPONENT + country);
@@ -79,7 +85,6 @@ public class ServerVerticle extends AbstractVerticle {
     private void getMetrics(RoutingContext routingContext) {
         MetricsService metricsService = MetricsService.create(vertx);
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
-        metricService.increaseRequestCounter();
         routingContext.response().putHeader("content-type", "text/json")
                 .end(Json.encodePrettily(metrics));
     }
