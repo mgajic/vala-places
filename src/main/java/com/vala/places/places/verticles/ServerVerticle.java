@@ -62,7 +62,7 @@ public class ServerVerticle extends AbstractVerticle {
 
     private void getMetric(RoutingContext routingContext) {
 
-        routingContext.response().putHeader("content-type", "text/json")
+        routingContext.response().putHeader("content-type", "application/json")
                 .end(Json.encodePrettily(metricService.getPlacesMetric()));
 
     }
@@ -78,14 +78,14 @@ public class ServerVerticle extends AbstractVerticle {
         Param components = new Param(COMPONENTS_PARAM_TYPE).value(COUNTRY_COMPONENT + country);
         List<Prediction> placePredictions = client.getPlacePredictions(text, components);
 
-        routingContext.response().putHeader("content-type", "text/json")
+        routingContext.response().putHeader("content-type", "application/json")
                 .end(Json.encodePrettily(placePredictions));
     }
 
     private void getMetrics(RoutingContext routingContext) {
         MetricsService metricsService = MetricsService.create(vertx);
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
-        routingContext.response().putHeader("content-type", "text/json")
+        routingContext.response().putHeader("content-type", "application/json")
                 .end(Json.encodePrettily(metrics));
     }
 
